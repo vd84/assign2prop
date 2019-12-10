@@ -1,6 +1,6 @@
 (ns assign2prop.core)
 (import java.io.FileReader java.io.File)
-(import  java.io.Closeable)
+(import java.io.Closeable)
 
 ;If an exception is thrown inside the expression the exception should be returned.
 ;Otherwise the evaluated value of the expression should be returned. If a binding is
@@ -10,8 +10,12 @@
 ;the Closeable–interface (hint: use type hints). The return value of the macro
 ;is either the return value of the executed form or an exception.
 (defmacro safe [vect & expr]
-  (let vect)
-  `(try ~expr (catch Exception e# (str "Caught exception: " e#))))
+  (if (instance? java.io.Closeable vect) (.close vect))
+  `(let ~vect (try ~@expr (catch Exception e# (str "Caught exception: " e#))))
+  ;`(try ~@expr)
+  )
+
+
 
 (defn -main []
   ;(def s (FileReader. (File. "C:\\Users\\dogge\\IdeaProjects\\assign2prop\\src\\assign2prop\\text.txt")))
