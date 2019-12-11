@@ -31,15 +31,21 @@
 
   )
 
-(defmacro safe [expr]
+(defmacro safe [& parameters]
+  (if (> (count parameters) 1)
 
-  ; utvärdera expression och kasta exception ifall det finns ett exception
+    (
+      let [newVect (first parameters)
+           expr (rest parameters)
+           ]
+      (if (instance? java.io.Closeable (ffirst parameters)) (println ("ute")) )
+      (if (instance? java.io.Closeable newVect) (.close newVect))
+      `(let ~newVect (try ~@expr (catch Exception e# (str "Exception caught: " e#))))
+      )
 
-  `(try ~expr (catch Exception e# (str "Caught exception " e#)))
-
-  ;`(let ~vect (try ~@expr (catch Exception e# e#))          ; här binds värdet s till vektorn
-
-  )
+    `(try
+       ~@parameters
+       (catch Exception e# (str "Exception caught: " e#)))))
 
 
 
@@ -50,7 +56,8 @@
 (defn -main []
   ;(def s (FileReader. (File. "C:\\Users\\dogge\\IdeaProjects\\assign2prop\\src\\assign2prop\\text.txt")))
   (def v (safe (/ 1 0)))
-  (def v (safe [s (FileReader. (File. "C:\\Usedsrs\\dogge\\IdeaProjects\\assign2prop\\src\\assign2prop\\text.txt"))] (.read s)))
+  (println v)
+  (def v (safe [s (FileReader. (File. "C:\\Users\\dogge\\IdeaProjects\\assign2prop\\src\\assign2prop\\text.txt"))] (.read s)))
   (println v)
   )
 
