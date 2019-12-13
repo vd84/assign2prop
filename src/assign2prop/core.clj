@@ -32,20 +32,17 @@
   )
 
 (defmacro safe [& parameters]
-  (if (> (count parameters) 1)
+  (if (>(count parameters) 1)
 
-    (let [newVect (first parameters)
-          expr (rest parameters)
-          ]
-      (if (instance? java.io.Closeable (ffirst parameters)) (println ("ute")))
-      (if (instance? java.io.Closeable newVect) (.close newVect))
-      `(let ~newVect (try ~@expr (catch Exception e# (str "Exception caught: " e#))))
-      )
+    `(try
+       (let ~(first parameters) (def expression ~(second parameters)) ; define expr for later use
+                                (if (instance?  Closeable ~(ffirst parameters))
+                                  (.close ~(ffirst parameters))) expression) ;return expression after close first value in vector
+       (catch Exception e# (str "Exception caught: " e#)))
 
     `(try
        ~@parameters
-       (catch Exception e# (str "Exception caught: " e#)))))
-
+       (catch Exception  e# (str "Exception caught: " e#)))))
 
 
 
