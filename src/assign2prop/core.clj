@@ -30,30 +30,101 @@
               )
 
   )
-
+;;UPPGIFT 1
 (defmacro safe [& parameters]
-  (if (>(count parameters) 1)
+  (if (> (count parameters) 1)
 
     `(try
        (let ~(first parameters) (def expression ~(second parameters)) ; define expr for later use
-                                (if (instance?  Closeable ~(ffirst parameters))
+                                (if (instance? Closeable ~(ffirst parameters))
                                   (.close ~(ffirst parameters))) expression) ;return expression after close first value in vector
        (catch Exception e# (str "Exception caught: " e#)))
 
     `(try
        ~@parameters
-       (catch Exception  e# (str "Exception caught: " e#)))))
+       (catch Exception e# (str "Exception caught: " e#)))))
 
 
+
+; UPPGIFT 2
+(def <> "notEqual")
+;;from
+(defmacro from [table]
+  `(if (set? ~table)
+     (do ~table)
+     )
+  )
+
+;;extractRowValues
+(defn extractRowValues [row selKeys]
+  (let [extRow {}]
+    (if (> (count selKeys) 1)
+      (conj
+        (assoc extRow (first selKeys) (get row (first selKeys)))
+        (conj extRow (extractRowValues row (rest selKeys)))
+        )
+
+      (assoc extRow (first selKeys) (get row (first selKeys)))
+      )
+    )
+  )
+
+;;extractColumns
+(defn extractColumns [table selKeys]
+  (if (> (count table) 1)
+    (set
+      (concat
+        (conj #{} (extractRowValues (first table) selKeys))
+        (extractColumns (rest table) selKeys)
+        )
+      )
+
+    (set (conj #{} (extractRowValues (first table) selKeys)))
+    )
+  )
+
+;;WHERE
+
+;;TODO WRITE WHERE CLAUSE
+
+
+
+;;select
+(defmacro select ([columns from table]
+                  `(let [tbl# (~from ~table)]
+                     (extractColumns tbl# ~columns)
+                     )
+                  )
+
+
+  ([columns from table where col opList]
+   `(let [tbl# (~from ~table)]
+      (do
+        (where ~col ~opList (extractColumns tbl# ~columns))
+        )
+      )
+   )
+
+  )
 
 
 
 
 (defn -main []
+  ;;TODO WHERE
+  (def squad #{
+                 {:id 1 :name "Dogge"}
+                 {:id 2 :name "Peter"}
+                 {:id 3 :name "fabian"}
+                 {:id 4 :name "Michel"}
+                 })
+
+
+  (println (select [:id :name] from squad))
   ;(def s (FileReader. (File. "C:\\Users\\dogge\\IdeaProjects\\assign2prop\\src\\assign2prop\\text.txt")))
-  (def v (safe (/ 1 0)))
-  (println v)
-  (def v (safe [s (FileReader. (File. "C:\\Users\\dogge\\IdeaProjects\\assign2prop\\src\\assign2prop\\text.txt"))] (.read s)))
-  (println v)
+  ;(def v (safe (/ 1 0)))
+  ;(println v)
+  ;(def v (safe [s (FileReader. (File. "C:\\Users\\dogge\\IdeaProjects\\assign2prop\\src\\assign2prop\\text.txt"))] (.read s)))
+  ;(println v)
   )
 
