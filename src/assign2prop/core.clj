@@ -47,7 +47,6 @@
 
 
 ; UPPGIFT 2
-(def <> "notEqual")
 ;;from
 (defmacro from [table]
   `(if (set? ~table)
@@ -56,12 +55,12 @@
   )
 
 ;;extractRowValues
-(defn extractRowValues [row selKeys]
+(defn extractRow [row selKeys]
   (let [extRow {}]
     (if (> (count selKeys) 1)
       (conj
         (assoc extRow (first selKeys) (get row (first selKeys)))
-        (conj extRow (extractRowValues row (rest selKeys)))
+        (conj extRow (extractRow row (rest selKeys)))
         )
 
       (assoc extRow (first selKeys) (get row (first selKeys)))
@@ -70,16 +69,16 @@
   )
 
 ;;extractColumns
-(defn extractColumns [table selKeys]
+(defn extractColumn [table selKeys]
   (if (> (count table) 1)
     (set
       (concat
-        (conj #{} (extractRowValues (first table) selKeys))
-        (extractColumns (rest table) selKeys)
+        (conj #{} (extractRow (first table) selKeys))
+        (extractColumn (rest table) selKeys)
         )
       )
 
-    (set (conj #{} (extractRowValues (first table) selKeys)))
+    (set (conj #{} (extractRow (first table) selKeys)))
     )
   )
 
@@ -92,7 +91,7 @@
 ;;select
 (defmacro select ([columns from table]
                   `(let [tbl# (~from ~table)]
-                     (extractColumns tbl# ~columns)
+                     (extractColumn tbl# ~columns)
                      )
                   )
 
@@ -100,7 +99,7 @@
   ([columns from table where col opList]
    `(let [tbl# (~from ~table)]
       (do
-        (where ~col ~opList (extractColumns tbl# ~columns))
+        (where ~col ~opList (extractColumn tbl# ~columns))
         )
       )
    )
